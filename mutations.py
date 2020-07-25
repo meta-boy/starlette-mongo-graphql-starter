@@ -23,5 +23,22 @@ class CreatePerson(graphene.Mutation):
         return CreatePerson(person=person)
 
 
+class UpdatePerson(graphene.Mutation):
+    class Arguments:
+        name = graphene.String()
+        age = graphene.Int()
+    
+    person = graphene.Field(Person)
+
+    async def mutate(self, info, name, age):
+        request = info.context['request']
+        doc = request.state.db.users
+        doc.update_one({'name': name}, {'$set': {'age': age}})
+        person = Person(name = name, age = age)
+
+        return UpdatePerson(person = person)
+            
+
 class Mutations(graphene.ObjectType):
     create_person = CreatePerson.Field()
+    update_person = UpdatePerson.Field()
